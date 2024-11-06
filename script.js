@@ -1,140 +1,131 @@
-// Get DOM elements
-const participantsDiv = document.getElementById('participants');
-const itemsDiv = document.getElementById('items');
-const summaryList = document.getElementById('summary');
+// DOM Elements
+const participantsContainer = document.getElementById('participants-container');
+const itemsContainer = document.getElementById('items-container');
+const summaryContainer = document.getElementById('summary-container');
 const splitMethodSelect = document.getElementById('split-method');
+const customPercentagesDiv = document.getElementById('custom-percentages');
+const customPercentagesContainer = document.getElementById('custom-percentages-container');
 
-// Data storage
-let participants = [];
-let items = [];
+// Data
+const participants = [];
+const items = [];
+const customPercentages = {};
 
 // Add Participant
 document.getElementById('add-participant').addEventListener('click', () => {
-  const id = Date.now();
-  participants.push({ id, name: '', isPresent: true, customPercentage: 0 });
+  const participant = { id: participants.length, name: '', present: true };
+  participants.push(participant);
   renderParticipants();
+  updateCustomPercentages();
 });
-
-// Remove Participant
-function removeParticipant(id) {
-  participants = participants.filter(p => p.id !== id);
-  renderParticipants();
-}
 
 // Add Item
 document.getElementById('add-item').addEventListener('click', () => {
-  const id = Date.now();
-  items.push({ id, name: '', price: 0 });
+  const item = { id: items.length, name: '', price: 0, assignedTo: [] };
+  items.push(item);
   renderItems();
 });
 
-// Remove Item
-function removeItem(id) {
-  items = items.filter(i => i.id !== id);
-  renderItems();
-}
+// Update Split Method
+splitMethodSelect.addEventListener('change', () => {
+  const isCustom = splitMethodSelect.value === 'custom';
+  customPercentagesDiv.classList.toggle('hidden', !isCustom);
+  calculateSplit();
+});
 
 // Render Participants
 function renderParticipants() {
-  participantsDiv.innerHTML = '';
+  participantsContainer.innerHTML = '';
   participants.forEach(participant => {
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <input 
-        type="text" 
-        placeholder="Name" 
-        value="${participant.name}" 
-        oninput="updateParticipantName(${participant.id}, this.value)">
-      <label>
-        <input 
-          type="checkbox" 
-          ${participant.isPresent ? 'checked' : ''} 
-          onchange="toggleAttendance(${participant.id})">
-        Present
-      </label>
-      <input 
-        type="number" 
-        placeholder="Custom %" 
-        value="${participant.customPercentage}" 
-        ${splitMethodSelect.value !== 'custom' ? 'disabled' : ''} 
-        oninput="updateCustomPercentage(${participant.id}, this.value)">
-      <button onclick="removeParticipant(${participant.id})">Remove</button>
-    `;
-    participantsDiv.appendChild(div);
+    const participantDiv = document.createElement('div');
+
+    // Name Input
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = 'Participant Name';
+    nameInput.value = participant.name;
+    nameInput.addEventListener('input', e => {
+      participant.name = e.target.value;
+      updateCustomPercentages();
+    });
+
+    // Present Toggle
+    const toggleWrapper = document.createElement('label');
+    toggleWrapper.classList.add('toggle');
+    const toggleInput = document.createElement('input');
+    toggleInput.type = 'checkbox';
+    toggleInput.checked = participant.present;
+    toggleInput.addEventListener('change', e => {
+      participant.present = e.target.checked;
+    });
+    const toggleSlider = document.createElement('span');
+    toggleSlider.classList.add('toggle-slider');
+    toggleWrapper.appendChild(toggleInput);
+    toggleWrapper.appendChild(toggleSlider);
+
+    // Append Elements
+    participantDiv.appendChild(nameInput);
+    participantDiv.appendChild(toggleWrapper);
+    participantsContainer.appendChild(participantDiv);
   });
 }
 
 // Render Items
 function renderItems() {
-  itemsDiv.innerHTML = '';
+  itemsContainer.innerHTML = '';
   items.forEach(item => {
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <input 
-        type="text" 
-        placeholder="Item Name" 
-        value="${item.name}" 
-        oninput="updateItemName(${item.id}, this.value)">
-      <input 
-        type="number" 
-        placeholder="Price" 
-        value="${item.price}" 
-        oninput="updateItemPrice(${item.id}, this.value)">
-      <button onclick="removeItem(${item.id})">Remove</button>
-    `;
-    itemsDiv.appendChild(div);
+    const itemDiv = document.createElement('div');
+
+    // Name Input
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = 'Item Name';
+    nameInput.value = item.name;
+    nameInput.addEventListener('input', e => {
+      item.name = e.target.value;
+    });
+
+    // Price Input
+    const priceInput = document.createElement('input');
+    priceInput.type = 'number';
+    priceInput.placeholder = 'Price';
+    priceInput.value = item.price;
+    priceInput.addEventListener('input', e => {
+      item.price = parseFloat(e.target.value) || 0;
+    });
+
+    // Append Elements
+    itemDiv.appendChild(nameInput);
+    itemDiv.appendChild(priceInput);
+    itemsContainer.appendChild(itemDiv);
   });
 }
 
-// Update Participant Name
-function updateParticipantName(id, value) {
-  participants = participants.map(p => p.id === id ? { ...p, name: value } : p);
-}
-
-// Toggle Attendance
-function toggleAttendance(id) {
-  participants = participants.map(p => p.id === id ? { ...p, isPresent: !p.isPresent } : p);
-}
-
-// Update Custom Percentage
-function updateCustomPercentage(id, value) {
-  participants = participants.map(p => p.id === id ? { ...p, customPercentage: +value } : p);
-}
-
-// Update Item Name
-function updateItemName(id, value) {
-  items = items.map(i => i.id === id ? { ...i, name: value } : i);
-}
-
-// Update Item Price
-function updateItemPrice(id, value) {
-  items = items.map(i => i.id === id ? { ...i, price: +value } : i);
-}
-
-// Calculate Totals
-splitMethodSelect.addEventListener('change', updateSummary);
-
-function updateSummary() {
-  summaryList.innerHTML = '';
-  const totalCost = items.reduce((sum, item) => sum + item.price, 0);
-
+// Update Custom Percentages
+function updateCustomPercentages() {
+  customPercentagesContainer.innerHTML = '';
   participants.forEach(participant => {
-    let amount = 0;
-
-    if (splitMethodSelect.value === 'dutch') {
-      amount = totalCost / participants.length;
-    } else if (splitMethodSelect.value === 'attendance') {
-      const presentCount = participants.filter(p => p.isPresent).length;
-      amount = participant.isPresent ? totalCost / presentCount : 0;
-    } else if (splitMethodSelect.value === 'custom') {
-      const totalPercentage = participants.reduce((sum, p) => sum + p.customPercentage, 0);
-      if (totalPercentage === 100) {
-        amount = (totalCost * participant.customPercentage) / 100;
-      }
+    if (!customPercentages[participant.name]) {
+      customPercentages[participant.name] = 0;
     }
 
-    const li = document.createElement('li');
-    li.textContent = `${participant.name || 'Unnamed'}: $${amount.toFixed(2)}`;
-    summaryList.appendChild(li);
+    const customDiv = document.createElement('div');
+    const label = document.createElement('span');
+    label.textContent = participant.name || 'Unnamed';
+
+    const percentageInput = document.createElement('input');
+    percentageInput.type = 'number';
+    percentageInput.value = customPercentages[participant.name];
+    percentageInput.addEventListener('input', e => {
+      customPercentages[participant.name] = parseFloat(e.target.value) || 0;
+      calculateSplit();
+    });
+
+    customDiv.appendChild(label);
+    customDiv.appendChild(percentageInput);
+    customPercentagesContainer.appendChild(customDiv);
   });
+}
+
+// Calculate Split
+function calculateSplit() {
+  // Add calculation logic
 }

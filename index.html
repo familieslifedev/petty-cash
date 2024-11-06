@@ -3,44 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Petty Cash Splitter</title>
+  <title>Petty Cash</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Petty Cash Splitter</h1>
+<header>
+  <h1>Petty Cash</h1>
+  <p>Split bills without the drama 💸</p>
+</header>
+<main>
+  <section id="participants-section">
+    <h2>Participants</h2>
+    <div id="participants-container"></div>
+    <button id="add-participant">+ Add Participant</button>
+  </section>
 
-    <!-- Add Participants -->
-    <section>
-      <h2>Add Participants</h2>
-      <div id="participants"></div>
-      <button id="add-participant">Add Participant</button>
-    </section>
+  <section id="items-section">
+    <h2>Items</h2>
+    <div id="items-container"></div>
+    <button id="add-item">+ Add Item</button>
+  </section>
 
-    <!-- Add Items -->
-    <section>
-      <h2>Add Items</h2>
-      <div id="items"></div>
-      <button id="add-item">Add Item</button>
-    </section>
+  <section id="split-method-section">
+    <h2>Select Split Method</h2>
+    <select id="split-method">
+      <option value="itemized">Itemized (Your Food Only)</option>
+      <option value="dutch">Dutch (Equal Split)</option>
+      <option value="attendance">Attendance-Based</option>
+      <option value="custom">Custom Percentages</option>
+    </select>
+    <div id="custom-percentages" class="hidden">
+      <h3>Custom Percentages</h3>
+      <div id="custom-percentages-container"></div>
+    </div>
+  </section>
 
-    <!-- Select Split Method -->
-    <section>
-      <h2>Select Split Method</h2>
-      <select id="split-method">
-        <option value="dutch">Dutch (Equal Split)</option>
-        <option value="attendance">Even Split by Attendance</option>
-        <option value="custom">Custom Percentages</option>
-      </select>
-    </section>
-
-    <!-- Payment Summary -->
-    <section>
-      <h2>Payment Summary</h2>
-      <ul id="summary"></ul>
-    </section>
-  </div>
-
-  <script src="script.js"></script>
+  <section id="summary-section">
+    <h2>Payment Summary</h2>
+    <ul id="summary-container"></ul>
+  </section>
+</main>
+<script src="script.js"></script>
 </body>
 </html>

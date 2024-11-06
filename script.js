@@ -125,7 +125,64 @@ function updateCustomPercentages() {
   });
 }
 
-// Calculate Split
+ // Calculate Split
 function calculateSplit() {
-  // Add calculation logic
+  const method = splitMethodSelect.value;
+  const summary = {};
+
+  // Initialize summary for each participant
+  participants.forEach(participant => {
+    summary[participant.name] = 0;
+  });
+
+  if (method === 'itemized') {
+    // Itemized Split
+    items.forEach(item => {
+      item.assignedTo.forEach(name => {
+        summary[name] += item.price / item.assignedTo.length;
+      });
+    });
+  } else if (method === 'dutch') {
+    // Dutch Split
+    const totalBill = items.reduce((sum, item) => sum + item.price, 0);
+    const perPerson = totalBill / participants.length;
+    participants.forEach(participant => {
+      summary[participant.name] = perPerson;
+    });
+  } else if (method === 'attendance') {
+    // Attendance-Based Split
+    const presentParticipants = participants.filter(p => p.present).map(p => p.name);
+    items.forEach(item => {
+      const sharedAmong = item.assignedTo.filter(name => presentParticipants.includes(name));
+      sharedAmong.forEach(name => {
+        summary[name] += item.price / sharedAmong.length;
+      });
+    });
+  } else if (method === 'custom') {
+    // Custom Percentages Split
+    const totalBill = items.reduce((sum, item) => sum + item.price, 0);
+    const totalPercentage = Object.values(customPercentages).reduce((sum, perc) => sum + perc, 0);
+
+    if (totalPercentage !== 100) {
+      alert('Custom percentages must add up to 100%.');
+      return;
+    }
+
+    participants.forEach(participant => {
+      summary[participant.name] = (customPercentages[participant.name] / 100) * totalBill;
+    });
+  }
+
+  renderSummary(summary);
 }
+
+// Render Summary
+function renderSummary(summary) {
+  summaryContainer.innerHTML = '';
+  Object.entries(summary).forEach(([name, amount]) => {
+    const summaryItem = document.createElement('li');
+    summaryItem.textContent = `${name}: $${amount.toFixed(2)}`;
+    summaryContainer.appendChild(summaryItem);
+  });
+}
+

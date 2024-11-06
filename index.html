@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Petty Cash Splitter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Petty Cash Splitter</h1>
+
+    <!-- Add Participants -->
+    <section>
+      <h2>Add Participants</h2>
+      <div id="participants"></div>
+      <button id="add-participant">Add Participant</button>
+    </section>
+
+    <!-- Add Items -->
+    <section>
+      <h2>Add Items</h2>
+      <div id="items"></div>
+      <button id="add-item">Add Item</button>
+    </section>
+
+    <!-- Select Split Method -->
+    <section>
+      <h2>Select Split Method</h2>
+      <select id="split-method">
+        <option value="dutch">Dutch (Equal Split)</option>
+        <option value="attendance">Even Split by Attendance</option>
+        <option value="custom">Custom Percentages</option>
+      </select>
+    </section>
+
+    <!-- Payment Summary -->
+    <section>
+      <h2>Payment Summary</h2>
+      <ul id="summary"></ul>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

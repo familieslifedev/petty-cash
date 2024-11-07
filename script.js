@@ -18,7 +18,7 @@ const customPercentages = {};
 
 // Add Participant
 document.getElementById('add-participant').addEventListener('click', () => {
-    const participant = { id: participants.length, name: '', present: true };
+    const participant = {id: participants.length, name: '', present: true};
     participants.push(participant);
     renderParticipants();
     if (splitMethodSelect.value === 'custom') {
@@ -28,7 +28,7 @@ document.getElementById('add-participant').addEventListener('click', () => {
 
 // Add Item
 document.getElementById('add-item').addEventListener('click', () => {
-    const item = { id: items.length, name: '', price: 0, assignedTo: [] };
+    const item = {id: items.length, name: '', price: 0, assignedTo: []};
     items.push(item);
     renderItems();
 });
@@ -175,11 +175,13 @@ function renderCustomPercentages() {
 
 // Toggle Custom Percentages Visibility
 splitMethodSelect.addEventListener('change', () => {
-    const isCustom = splitMethodSelect.value === 'custom';
-    if (isCustom) {
-        renderCustomPercentages();
-    } else {
-        customPercentagesDiv.classList.add('hidden'); // Hide when not custom
+    switch (splitMethodSelect.value) {
+        case 'custom':
+            renderCustomPercentages();
+            break;
+        default:
+            customPercentagesDiv.classList.add('hidden'); // Hide when not custom
+            break;
     }
 });
 
@@ -228,35 +230,43 @@ function calculateSplit() {
     const method = splitMethodSelect.value;
     const total = items.reduce((sum, item) => sum + item.price, 0);
 
-    if (method === 'itemized') {
-        // Itemized Split
-        items.forEach(item => {
-            item.assignedTo.forEach(name => {
-                summary[name] += item.price / item.assignedTo.length;
+    switch (method) {
+        case 'itemized':
+            // Itemized Split
+            items.forEach(item => {
+                item.assignedTo.forEach(name => {
+                    summary[name] += item.price / item.assignedTo.length;
+                });
             });
-        });
-    } else if (method === 'dutch') {
-        // Dutch Split
-        const perPerson = total / participants.length;
-        participants.forEach(p => (summary[p.name] = perPerson));
-    } else if (method === 'attendance') {
-        // Attendance-Based Split
-        items.forEach(item => {
-            const presentParticipants = participants.filter(p => p.present && item.assignedTo.includes(p.name));
-            presentParticipants.forEach(p => {
-                summary[p.name] += item.price / presentParticipants.length;
+            break;
+        case 'dutch':
+            // Dutch Split
+            const perPerson = total / participants.length;
+            participants.forEach(p => (summary[p.name] = perPerson));
+            break;
+        case 'attendance':
+            // Attendance-Based Split
+            items.forEach(item => {
+                const presentParticipants = participants.filter(p => p.present && item.assignedTo.includes(p.name));
+                presentParticipants.forEach(p => {
+                    summary[p.name] += item.price / presentParticipants.length;
+                });
             });
-        });
-    } else if (method === 'custom') {
-        // Custom Percentages
-        const totalPercentage = Object.values(customPercentages).reduce((sum, perc) => sum + perc, 0);
-        if (totalPercentage !== 100) {
-            alert('Custom percentages must add up to 100%.');
+            break;
+        case 'custom':
+            // Custom Percentages
+            const totalPercentage = Object.values(customPercentages).reduce((sum, perc) => sum + perc, 0);
+            if (totalPercentage !== 100) {
+                alert('Custom percentages must add up to 100%.');
+                return;
+            }
+            participants.forEach(p => {
+                summary[p.name] = (customPercentages[p.name] / 100) * total || 0;
+            });
+            break;
+        default:
+            alert('Invalid split method selected.');
             return;
-        }
-        participants.forEach(p => {
-            summary[p.name] = (customPercentages[p.name] / 100) * total || 0;
-        });
     }
 
     renderSummary(summary);

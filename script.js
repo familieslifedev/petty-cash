@@ -12,8 +12,8 @@ const participantTemplate = document.getElementById('participant-template').cont
 const itemTemplate = document.getElementById('item-template').content;
 
 // Data
-const participants = [];
-const items = [];
+let participants = [];
+let items = [];
 const customPercentages = {};
 
 // Add Participant
@@ -141,7 +141,7 @@ function renderCustomPercentages() {
     customPercentagesContainer.innerHTML = ''; // Clear existing inputs
 
     participants.forEach(participant => {
-        if (!customPercentages[participant.id]) { // Use ID
+        if (!customPercentages.hasOwnProperty(participant.id)) { // Use ID
             customPercentages[participant.id] = 0;
         }
 
@@ -163,11 +163,18 @@ function renderCustomPercentages() {
         customDiv.appendChild(percentageInput);
         customPercentagesContainer.appendChild(customDiv);
     });
+
+    // Remove custom percentages for removed participants
+    Object.keys(customPercentages).forEach(id => {
+        if (!participants.some(p => p.id === id)) {
+            delete customPercentages[id];
+        }
+    });
 }
 
 // Remove Participant
 function removeParticipant(id) {
-    participants.splice(id, 1);
+    participants = participants.filter(p => p.id !== id);
     participants.forEach((p, index) => (p.id = index)); // Reassign IDs
     renderParticipants();
     if (splitMethodSelect.value === 'custom') {
@@ -177,7 +184,7 @@ function removeParticipant(id) {
 
 // Remove Item
 function removeItem(id) {
-    items.splice(id, 1);
+    items = items.filter(item => item.id !== id);
     items.forEach((item, index) => (item.id = index)); // Reassign IDs
     renderItems();
 }
@@ -261,7 +268,7 @@ function calculateSplit() {
             break;
         case 'custom':
             const totalPercentage = Object.values(customPercentages).reduce((sum, perc) => sum + perc, 0);
-            if (totalPercentage !== 100) {
+            if (Math.abs(totalPercentage - 100) > 0.01) { // Allow small floating-point errors
                 alert('Custom percentages must add up to 100%.');
                 return;
             }
@@ -272,6 +279,13 @@ function calculateSplit() {
         default:
             alert('Invalid split method selected.');
             return;
+    }
+
+    // Validate the total split amount
+    const totalSplit = Object.values(summary).reduce((sum, amount) => sum + amount, 0);
+    if (Math.abs(totalSplit - total) > 0.01) { // Allow small floating-point errors
+        alert('The total split amount does not match the total cost of the items.');
+        return;
     }
 
     renderSummary(summary);

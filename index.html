@@ -51,9 +51,9 @@
     <!-- Hidden Templates -->
     <template id="participant-template">
         <div class="participant-row">
-            <input type="text" class="participant-name" placeholder="Participant Name">
-            <label class="toggle">
-                <input type="checkbox" class="participant-present">
+            <input type="text" id="participant-name" class="participant-name" placeholder="Participant Name">
+            <label class="toggle" for="participant-present">
+                <input type="checkbox" id="participant-present" class="participant-present">
                 <span class="toggle-slider"></span>
             </label>
             <span>Present</span>
@@ -63,8 +63,8 @@
 
     <template id="item-template">
         <div class="item-row">
-            <input type="text" class="item-name" placeholder="Item Name">
-            <input type="number" class="item-price" placeholder="Price">
+            <input type="text" id="item-name" class="item-name" placeholder="Item Name">
+            <input type="number" id="item-price" class="item-price" placeholder="Price">
             <div class="assign-container">
                 <span>Assign to:</span>
                 <!-- Checkboxes for participants will be dynamically added here -->

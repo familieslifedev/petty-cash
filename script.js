@@ -18,7 +18,7 @@ const customPercentages = {};
 
 // Add Participant
 document.getElementById('add-participant').addEventListener('click', () => {
-    const participant = {id: participants.length, name: '', present: true};
+    const participant = { id: participants.length, name: '', present: true };
     participants.push(participant);
     renderParticipants();
     if (splitMethodSelect.value === 'custom') {
@@ -28,7 +28,7 @@ document.getElementById('add-participant').addEventListener('click', () => {
 
 // Add Item
 document.getElementById('add-item').addEventListener('click', () => {
-    const item = {id: items.length, name: '', price: 0, assignedTo: []};
+    const item = { id: items.length, name: '', price: 0, assignedTo: [] };
     items.push(item);
     renderItems();
 });
@@ -183,8 +183,45 @@ splitMethodSelect.addEventListener('change', () => {
     }
 });
 
+// Input Validation
+function validateInputs() {
+    let isValid = true;
+    let errorMessages = [];
+
+    // Validate participant names
+    participants.forEach((participant, index) => {
+        if (!participant.name.trim()) {
+            isValid = false;
+            errorMessages.push(`Participant #${index + 1} is missing a name.`);
+        }
+    });
+
+    // Validate items
+    items.forEach((item, index) => {
+        if (!item.name.trim()) {
+            isValid = false;
+            errorMessages.push(`Item #${index + 1} is missing a name.`);
+        }
+        if (item.price <= 0) {
+            isValid = false;
+            errorMessages.push(`Item #${index + 1} must have a price greater than 0.`);
+        }
+    });
+
+    // Show error messages if validation fails
+    if (!isValid) {
+        alert(errorMessages.join('\n'));
+    }
+
+    return isValid;
+}
+
 // Calculate Split
 function calculateSplit() {
+    if (!validateInputs()) {
+        return; // Stop if inputs are invalid
+    }
+
     const summary = {};
     participants.forEach(p => (summary[p.name] = 0)); // Initialize summary
 
@@ -232,5 +269,28 @@ function renderSummary(summary) {
         .join('');
 }
 
+// Serialize Data for Backend Integration
+function serializeData() {
+    return JSON.stringify({
+        participants: participants.map(p => ({
+            name: p.name,
+            present: p.present
+        })),
+        items: items.map(i => ({
+            name: i.name,
+            price: i.price,
+            assignedTo: i.assignedTo
+        })),
+        splitMethod: splitMethodSelect.value,
+        customPercentages
+    });
+}
+
 // Attach Calculate Button Event
-calculateButton.addEventListener('click', calculateSplit);
+calculateButton.addEventListener('click', () => {
+    if (validateInputs()) {
+        const jsonData = serializeData(); // Call serializeData to generate JSON
+        console.log('Serialized JSON:', jsonData); // Log the JSON to the console
+        calculateSplit(); // Proceed with calculations
+    }
+});

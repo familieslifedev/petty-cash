@@ -18,7 +18,7 @@ const customPercentages = {};
 
 // Add Participant
 document.getElementById('add-participant').addEventListener('click', () => {
-    const participant = { id: participants.length, name: '', present: true };
+    const participant = {id: participants.length, name: '', present: true};
     participants.push(participant);
     renderParticipants();
     if (splitMethodSelect.value === 'custom') {
@@ -28,7 +28,7 @@ document.getElementById('add-participant').addEventListener('click', () => {
 
 // Add Item
 document.getElementById('add-item').addEventListener('click', () => {
-    const item = { id: items.length, name: '', price: 0, assignedTo: [] };
+    const item = {id: items.length, name: '', price: 0, assignedTo: []};
     items.push(item);
     renderItems();
 });
@@ -279,6 +279,22 @@ function calculateSplit() {
         default:
             alert('Invalid split method selected.');
             return;
+    }
+
+    // Round each amount to 2 decimal places
+    let roundedTotal = 0;
+    Object.keys(summary).forEach(id => {
+        summary[id] = parseFloat(summary[id].toFixed(2));
+        roundedTotal += summary[id];
+    });
+
+    // Calculate the difference
+    const difference = parseFloat((total - roundedTotal).toFixed(2));
+
+    // Adjust one participant's amount to cover the difference
+    if (difference !== 0) {
+        const randomParticipantId = participants[Math.floor(Math.random() * participants.length)].id;
+        summary[randomParticipantId] = parseFloat((summary[randomParticipantId] + difference).toFixed(2));
     }
 
     // Validate the total split amount

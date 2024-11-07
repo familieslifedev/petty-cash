@@ -82,14 +82,8 @@ select {
 .toggle {
     position: relative;
     display: inline-block;
-    width: 40px;
-    height: 20px;
-}
-
-.toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+    width: 60px; /* Increased width */
+    height: 25px; /* Original height */
 }
 
 .toggle-slider {
@@ -106,8 +100,8 @@ select {
 .toggle-slider:before {
     content: '';
     position: absolute;
-    height: 16px;
-    width: 16px;
+    height: 21px; /* Original height */
+    width: 21px; /* Original width */
     left: 2px;
     bottom: 2px;
     background-color: white;
@@ -120,7 +114,7 @@ input:checked + .toggle-slider {
 }
 
 input:checked + .toggle-slider:before {
-    transform: translateX(20px);
+    transform: translateX(14px); /* Adjusted transform distance */
 }
 
 /* Hidden Elements */
@@ -129,12 +123,6 @@ input:checked + .toggle-slider:before {
 }
 
 /* Checkbox Styling - Green */
-.checkbox-row {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
 .checkbox-row input[type="checkbox"] {
     width: 16px;
     height: 16px;
@@ -169,14 +157,6 @@ input:checked + .toggle-slider:before {
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 5px;
-}
-
-/* Custom Row */
-.custom-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
 }
 
 /* Remove Button */

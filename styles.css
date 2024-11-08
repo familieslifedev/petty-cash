@@ -229,7 +229,6 @@ input:checked + .toggle-slider:before {
 
 body.dark-mode {
     background-color: #333;
-    color: #fff;
     border: 1px solid #555;
 }
 

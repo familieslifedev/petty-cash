@@ -29,7 +29,6 @@ header p {
     color: #6c757d;
 }
 
-/* Main Content */
 main {
     max-width: 800px;
     margin: auto;
@@ -39,16 +38,28 @@ main {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+body.dark-mode {
+    background-color: #121212;
+    color: #000000;
+}
+
+main.dark-mode {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+/* Section Styling */
 section {
     margin-bottom: 20px;
 }
 
-section h2 {
+section h1 h2 h3 h4 h5 h6 {
     font-size: 1.25rem;
     margin-bottom: 10px;
-    color: #495057;
+    color: #ffffff;
 }
 
+/* Buttons */
 button {
     display: inline-block;
     background: #007bff;
@@ -58,10 +69,39 @@ button {
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
     background: #0056b3;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button.dark-mode {
+    background: #444;
+    color: #ddd;
+}
+
+button.dark-mode:hover {
+    background: #333;
+}
+
+/* Remove Button */
+.remove-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.remove-button:hover {
+    background: #c82333;
 }
 
 /* Inputs and Forms */
@@ -78,12 +118,18 @@ select {
     cursor: pointer;
 }
 
+input:focus, select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.25);
+}
+
 /* Toggle Switch */
 .toggle {
     position: relative;
     display: inline-block;
-    width: 60px; /* Increased width */
-    height: 25px; /* Original height */
+    width: 60px;
+    height: 25px;
 }
 
 .toggle-slider {
@@ -100,8 +146,8 @@ select {
 .toggle-slider:before {
     content: '';
     position: absolute;
-    height: 21px; /* Original height */
-    width: 21px; /* Original width */
+    height: 21px;
+    width: 21px;
     left: 2px;
     bottom: 2px;
     background-color: white;
@@ -110,11 +156,11 @@ select {
 }
 
 input:checked + .toggle-slider {
-    background-color: #28a745; /* Green for "Present" status */
+    background-color: #28a745;
 }
 
 input:checked + .toggle-slider:before {
-    transform: translateX(14px); /* Adjusted transform distance */
+    transform: translateX(14px);
 }
 
 /* Hidden Elements */
@@ -122,12 +168,12 @@ input:checked + .toggle-slider:before {
     display: none;
 }
 
-/* Checkbox Styling - Green */
+/* Checkbox Styling */
 .checkbox-row input[type="checkbox"] {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: #28a745; /* Green Checkbox */
+    accent-color: #28a745;
 }
 
 .checkbox-row label {
@@ -159,17 +205,91 @@ input:checked + .toggle-slider:before {
     margin-top: 5px;
 }
 
-/* Remove Button */
-.remove-button {
-    background: #dc3545; /* Red for delete */
+/* Tax and Tip Section */
+#tax-tip-section {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#tax-tip-section label {
+    font-size: 1rem;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+#tax-tip-section input, #tax-tip-section select {
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+body.dark-mode {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+/* Export Section */
+#export-section {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#export-section button {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#export-section button:hover {
+    background: #218838;
+}
+
+#export-section button:active {
+    background: #1e7e34;
+    transform: scale(0.98);
+}
+
+/* Theme Toggle Button */
+.theme-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.remove-button:hover {
-    background: #c82333; /* Darker red for hover */
+.theme-button:hover {
+    background: #0056b3;
+}
+
+body.dark-mode .theme-button {
+    background: #444;
+    color: #ddd;
+}
+
+body.dark-mode .theme-button:hover {
+    background: #555;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
 }

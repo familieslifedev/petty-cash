@@ -6,15 +6,17 @@ const customPercentagesContainer = document.getElementById('custom-percentages-c
 const splitMethodSelect = document.getElementById('split-method');
 const calculateButton = document.getElementById('calculate-button');
 const summaryContainer = document.getElementById('summary-container');
+const themeToggleButton = document.getElementById('theme-toggle');
 
 // Templates
 const participantTemplate = document.getElementById('participant-template').content;
 const itemTemplate = document.getElementById('item-template').content;
 
 // Data
-let participants = [];
-let items = [];
+const participants = [];
+const items = [];
 const customPercentages = {};
+let summary = {};
 
 // Add Participant
 document.getElementById('add-participant').addEventListener('click', () => {
@@ -40,6 +42,26 @@ calculateButton.addEventListener('click', () => {
         console.log('Serialized JSON:', jsonData); // Log the JSON to the console
         calculateSplit(); // Proceed with calculations
     }
+});
+
+// Theme Toggle Logic
+// Check the current theme (light or dark) on page load
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeToggleButton.textContent = '☀️'; // Set to Light Mode indicator
+} else {
+    themeToggleButton.textContent = '🌙'; // Set to Dark Mode indicator
+}
+
+// Toggle theme and update button text
+themeToggleButton.addEventListener('click', () => {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+
+    // Update button text
+    themeToggleButton.textContent = isDarkMode ? '☀️' : '🌙';
+
+    // Save preference to localStorage
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 });
 
 // Render Participants
@@ -141,7 +163,7 @@ function renderCustomPercentages() {
     customPercentagesContainer.innerHTML = ''; // Clear existing inputs
 
     participants.forEach(participant => {
-        if (!customPercentages.hasOwnProperty(participant.id)) { // Use ID
+        if (!customPercentages[participant.id]) { // Use ID
             customPercentages[participant.id] = 0;
         }
 
@@ -163,18 +185,11 @@ function renderCustomPercentages() {
         customDiv.appendChild(percentageInput);
         customPercentagesContainer.appendChild(customDiv);
     });
-
-    // Remove custom percentages for removed participants
-    Object.keys(customPercentages).forEach(id => {
-        if (!participants.some(p => p.id === id)) {
-            delete customPercentages[id];
-        }
-    });
 }
 
 // Remove Participant
 function removeParticipant(id) {
-    participants = participants.filter(p => p.id !== id);
+    participants.splice(id, 1);
     participants.forEach((p, index) => (p.id = index)); // Reassign IDs
     renderParticipants();
     if (splitMethodSelect.value === 'custom') {
@@ -184,7 +199,7 @@ function removeParticipant(id) {
 
 // Remove Item
 function removeItem(id) {
-    items = items.filter(item => item.id !== id);
+    items.splice(id, 1);
     items.forEach((item, index) => (item.id = index)); // Reassign IDs
     renderItems();
 }
@@ -240,12 +255,20 @@ function calculateSplit() {
         return; // Stop if inputs are invalid
     }
 
-    const summary = {};
+    summary = {}; // Reset summary
     participants.forEach(p => (summary[p.id] = 0)); // Initialize summary with IDs as keys
 
     const method = splitMethodSelect.value;
     const total = items.reduce((sum, item) => sum + item.price, 0);
 
+    // Get tax, tip, and currency values
+    const taxPercentage = parseFloat(document.getElementById('tax').value) || 0;
+    const tipPercentage = parseFloat(document.getElementById('tip').value) || 0;
+    const currency = document.getElementById('currency').value; // Get currency value
+
+    const totalWithExtras = total + total * (taxPercentage / 100) + total * (tipPercentage / 100);
+
+    // Split Calculations Based on Selected Method
     switch (method) {
         case 'itemized':
             items.forEach(item => {
@@ -255,7 +278,7 @@ function calculateSplit() {
             });
             break;
         case 'dutch':
-            const perPerson = total / participants.length;
+            const perPerson = totalWithExtras / participants.length;
             participants.forEach(p => (summary[p.id] = perPerson));
             break;
         case 'attendance':
@@ -268,12 +291,12 @@ function calculateSplit() {
             break;
         case 'custom':
             const totalPercentage = Object.values(customPercentages).reduce((sum, perc) => sum + perc, 0);
-            if (Math.abs(totalPercentage - 100) > 0.01) { // Allow small floating-point errors
+            if (totalPercentage !== 100) {
                 alert('Custom percentages must add up to 100%.');
                 return;
             }
             participants.forEach(p => {
-                summary[p.id] = (customPercentages[p.id] / 100) * total || 0;
+                summary[p.id] = (customPercentages[p.id] / 100) * totalWithExtras || 0;
             });
             break;
         default:
@@ -281,36 +304,25 @@ function calculateSplit() {
             return;
     }
 
-    // Round each amount to 2 decimal places
-    let roundedTotal = 0;
+    // Final Rounding
     Object.keys(summary).forEach(id => {
-        summary[id] = parseFloat(summary[id].toFixed(2));
-        roundedTotal += summary[id];
+        summary[id] = Math.round(summary[id] * 100) / 100; // Round to 2 decimal places
     });
 
-    // Calculate the difference
-    const difference = parseFloat((total - roundedTotal).toFixed(2));
-
-    // Adjust one participant's amount to cover the difference
-    if (difference !== 0) {
-        const randomParticipantId = participants[Math.floor(Math.random() * participants.length)].id;
-        summary[randomParticipantId] = parseFloat((summary[randomParticipantId] + difference).toFixed(2));
-    }
-
-    // Validate the total split amount
-    const totalSplit = Object.values(summary).reduce((sum, amount) => sum + amount, 0);
-    if (Math.abs(totalSplit - total) > 0.01) { // Allow small floating-point errors
-        alert('The total split amount does not match the total cost of the items.');
-        return;
-    }
-
-    renderSummary(summary);
+    renderSummary(summary, currency); // Pass currency explicitly
 }
 
 // Render Summary
-function renderSummary(summary) {
+function renderSummary(summary, currency) {
+    const currencySymbol = {
+        'usd': '$',
+        'gbp': '£',
+        'eur': '€',
+        'jpy': '¥' // Added JPY
+    }[currency] || '$';
+
     summaryContainer.innerHTML = participants
-        .map(p => `<li>${p.name}: $${(summary[p.id] || 0).toFixed(2)}</li>`)
+        .map(p => `<li>${p.name}: ${currencySymbol}${(summary[p.id] || 0).toFixed(2)}</li>`)
         .join('');
 }
 
@@ -331,3 +343,44 @@ function serializeData() {
         customPercentages
     });
 }
+
+// Export Functions
+document.getElementById('export-pdf').addEventListener('click', () => {
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF();
+
+    // Title
+    doc.text("Payment Summary", 10, 10);
+
+    // Add participants and their amounts
+    let yOffset = 20; // Start below the title
+    participants.forEach((p) => {
+        const amount = (summary[p.id] || 0).toFixed(2);
+        doc.text(`${p.name}: ${amount}`, 10, yOffset);
+        yOffset += 10; // Move down for the next line
+    });
+
+    // Save the PDF
+    doc.save('split_summary.pdf');
+});
+
+document.getElementById('export-csv').addEventListener('click', () => {
+    // Ensure calculations are up to date
+    calculateSplit();
+
+    // Generate CSV content
+    let csvContent = "data:text/csv;charset=utf-8,Name,Amount\n";
+    participants.forEach((p) => {
+        const amount = (summary[p.id] || 0).toFixed(2);
+        csvContent += `${p.name},${amount}\n`;
+    });
+
+    // Create a downloadable link and trigger it
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'split_summary.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link); // Clean up the link element
+});

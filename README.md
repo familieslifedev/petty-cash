@@ -60,7 +60,7 @@ petty-cash/
 ├── index.html        # Main app file
 ├── styles.css        # CSS for styling the app
 ├── script.js         # Core JavaScript logic
-└── assets/           # Images, icons, and other static files
+└── service-worker.js # Service worker for offline support
 ```
 
 ---

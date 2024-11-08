@@ -1,57 +1,195 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body and Layout */
 body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f9;
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+    line-height: 1.5;
+    padding: 20px;
 }
 
-.container {
-  max-width: 600px;
-  margin: 2rem auto;
-  background: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+header {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-h1, h2 {
-  text-align: center;
-  color: #333;
+header h1 {
+    font-size: 2rem;
+    color: #495057;
+}
+
+header p {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+/* Main Content */
+main {
+    max-width: 800px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+section h2 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    color: #495057;
 }
 
 button {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  color: #fff;
-  background: #007bff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 0.5rem 0;
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 
 button:hover {
-  background: #0056b3;
+    background: #0056b3;
 }
 
+/* Inputs and Forms */
 input, select {
-  width: 100%;
-  padding: 0.5rem;
-  margin: 0.5rem 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
 }
 
-#summary {
-  list-style-type: none;
-  padding: 0;
+select {
+    cursor: pointer;
 }
 
-#summary li {
-  margin: 0.5rem 0;
-  padding: 0.5rem;
-  background: #f4f4f4;
-  border-radius: 4px;
-  border: 1px solid #ddd;
+/* Toggle Switch */
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ced4da;
+    border-radius: 50px;
+    transition: 0.4s;
+}
+
+.toggle-slider:before {
+    content: '';
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+}
+
+input:checked + .toggle-slider {
+    background-color: #28a745; /* Green for "Present" status */
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* Hidden Elements */
+.hidden {
+    display: none;
+}
+
+/* Checkbox Styling - Green */
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.checkbox-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #28a745; /* Green Checkbox */
+}
+
+.checkbox-row label {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+/* Participant Row */
+.participant-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* Item Row */
+.item-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* Assign Container */
+.assign-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+/* Custom Row */
+.custom-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* Remove Button */
+.remove-button {
+    background: #dc3545; /* Red for delete */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.remove-button:hover {
+    background: #c82333; /* Darker red for hover */
 }

@@ -1,46 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Petty Cash Splitter</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petty Cash</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Petty Cash Splitter</h1>
-
-    <!-- Add Participants -->
-    <section>
-      <h2>Add Participants</h2>
-      <div id="participants"></div>
-      <button id="add-participant">Add Participant</button>
+<header>
+    <h1>Petty Cash</h1>
+    <h2>Split bills without the drama 💸</h2>
+</header>
+<main class="main-content">
+    <!-- Participants Section -->
+    <section id="participants-section" class="section">
+        <h2 class="section-title">Participants</h2>
+        <div id="participants-container" class="participants-container"></div>
+        <button id="add-participant" class="button">+ Add Participant</button>
     </section>
 
-    <!-- Add Items -->
-    <section>
-      <h2>Add Items</h2>
-      <div id="items"></div>
-      <button id="add-item">Add Item</button>
+    <!-- Items Section -->
+    <section id="items-section" class="section">
+        <h2 class="section-title">Items</h2>
+        <div id="items-container" class="items-container"></div>
+        <button id="add-item" class="button">+ Add Item</button>
     </section>
 
-    <!-- Select Split Method -->
-    <section>
-      <h2>Select Split Method</h2>
-      <select id="split-method">
-        <option value="dutch">Dutch (Equal Split)</option>
-        <option value="attendance">Even Split by Attendance</option>
-        <option value="custom">Custom Percentages</option>
-      </select>
+    <!-- Split Method Section -->
+    <section id="split-method-section" class="section">
+        <h2 class="section-title">Select Split Method</h2>
+        <select id="split-method" class="dropdown">
+            <option value="itemized">Itemized (Your Food Only)</option>
+            <option value="dutch">Dutch (Equal Split)</option>
+            <option value="attendance">Attendance-Based</option>
+            <option value="custom">Custom Percentages</option>
+        </select>
+        <div id="custom-percentages" class="hidden custom-percentages">
+            <h3 class="subsection-title">Custom Percentages</h3>
+            <div id="custom-percentages-container" class="custom-percentages-container"></div>
+        </div>
     </section>
 
-    <!-- Payment Summary -->
-    <section>
-      <h2>Payment Summary</h2>
-      <ul id="summary"></ul>
+    <!-- Summary Section -->
+    <section id="summary-section" class="section">
+        <h2 class="section-title">Payment Summary</h2>
+        <ul id="summary-container" class="summary-container"></ul>
+        <button id="calculate-button" class="button">Calculate</button>
     </section>
-  </div>
 
-  <script src="script.js"></script>
+    <!-- Hidden Templates -->
+    <template id="participant-template">
+        <div class="participant-row">
+            <input type="text" class="participant-name" placeholder="Participant Name">
+            <label class="toggle">
+                <input type="checkbox" class="participant-present">
+                <span class="toggle-slider"></span>
+            </label>
+            <span>Present</span>
+            <button class="remove-button">Remove</button>
+        </div>
+    </template>
+
+    <template id="item-template">
+        <div class="item-row">
+            <input type="text" class="item-name" placeholder="Item Name">
+            <input type="number" class="item-price" placeholder="Price">
+            <div class="assign-container">
+                <span>Assign to:</span>
+                <!-- Checkboxes for participants will be dynamically added here -->
+            </div>
+            <button class="remove-button">Remove</button>
+        </div>
+    </template>
+</main>
+<script src="script.js"></script>
 </body>
 </html>

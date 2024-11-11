@@ -266,7 +266,10 @@ function calculateSplit() {
     const tipPercentage = parseFloat(document.getElementById('tip').value) || 0;
     const currency = document.getElementById('currency').value; // Get currency value
 
-    const totalWithExtras = total + total * (taxPercentage / 100) + total * (tipPercentage / 100);
+    // Calculate tax and tip
+    const tax = total * (taxPercentage / 100);
+    const tip = total * (tipPercentage / 100);
+    const totalExtras = tax + tip; // Combined tax and tip
 
     // Split Calculations Based on Selected Method
     switch (method) {
@@ -277,10 +280,12 @@ function calculateSplit() {
                 });
             });
             break;
+
         case 'dutch':
-            const perPerson = totalWithExtras / participants.length;
+            const perPerson = total / participants.length; // Base split (items only)
             participants.forEach(p => (summary[p.id] = perPerson));
             break;
+
         case 'attendance':
             items.forEach(item => {
                 const presentParticipants = participants.filter(p => p.present && item.assignedTo.includes(p.id));
@@ -289,6 +294,7 @@ function calculateSplit() {
                 });
             });
             break;
+
         case 'custom':
             const totalPercentage = Object.values(customPercentages).reduce((sum, perc) => sum + perc, 0);
             if (totalPercentage !== 100) {
@@ -296,13 +302,17 @@ function calculateSplit() {
                 return;
             }
             participants.forEach(p => {
-                summary[p.id] = (customPercentages[p.id] / 100) * totalWithExtras || 0;
+                summary[p.id] = (customPercentages[p.id] / 100) * total || 0;
             });
             break;
+
         default:
             alert('Invalid split method selected.');
             return;
     }
+
+    // Distribute Tax and Tip Proportionally
+    distributeExtras(totalExtras, method);
 
     // Final Rounding
     Object.keys(summary).forEach(id => {
@@ -310,6 +320,52 @@ function calculateSplit() {
     });
 
     renderSummary(summary, currency); // Pass currency explicitly
+}
+
+// Distribute Extras Proportionally
+function distributeExtras(totalExtras, method) {
+    switch (method) {
+        case 'itemized':
+            // Distribute extras proportionally based on each participant's share
+            const totalShares = Object.values(summary).reduce((sum, value) => sum + value, 0);
+            participants.forEach(p => {
+                if (summary[p.id] > 0) {
+                    const sharePercentage = summary[p.id] / totalShares;
+                    summary[p.id] += totalExtras * sharePercentage;
+                }
+            });
+            break;
+
+        case 'dutch':
+            // Split extras evenly
+            const extrasPerPerson = totalExtras / participants.length;
+            participants.forEach(p => {
+                summary[p.id] += extrasPerPerson;
+            });
+            break;
+
+        case 'attendance':
+            // Distribute extras among present participants
+            const presentParticipants = participants.filter(p => p.present);
+            const extrasPerPresent = totalExtras / presentParticipants.length;
+            presentParticipants.forEach(p => {
+                summary[p.id] += extrasPerPresent;
+            });
+            break;
+
+        case 'custom':
+            // Distribute extras based on custom percentages
+            participants.forEach(p => {
+                if (customPercentages[p.id]) {
+                    const percentage = customPercentages[p.id] / 100;
+                    summary[p.id] += totalExtras * percentage;
+                }
+            });
+            break;
+
+        default:
+            console.error('Unknown method for distributing extras.');
+    }
 }
 
 // Render Summary

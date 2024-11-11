@@ -43,6 +43,11 @@ body.dark-mode {
     color: #000000;
 }
 
+body.dark-mode header h1,
+body.dark-mode header h2 {
+    color: #f8f9fa;
+}
+
 main.dark-mode {
     background-color: #1e1e1e;
     border: 1px solid #333;

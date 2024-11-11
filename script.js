@@ -1,4 +1,6 @@
-// DOM Elements
+/**
+ * DOM Elements
+ */
 const participantsContainer = document.getElementById('participants-container');
 const itemsContainer = document.getElementById('items-container');
 const customPercentagesDiv = document.getElementById('custom-percentages');
@@ -8,17 +10,24 @@ const calculateButton = document.getElementById('calculate-button');
 const summaryContainer = document.getElementById('summary-container');
 const themeToggleButton = document.getElementById('theme-toggle');
 
-// Templates
+/**
+ * Templates
+ */
 const participantTemplate = document.getElementById('participant-template').content;
 const itemTemplate = document.getElementById('item-template').content;
 
-// Data
+/**
+ * Data
+ */
 const participants = [];
 const items = [];
 const customPercentages = {};
 let summary = {};
 
-// Add Participant
+/**
+ * Add Participant
+ * Adds a new participant to the participants array and renders the participants.
+ */
 document.getElementById('add-participant').addEventListener('click', () => {
     const participant = {id: participants.length, name: '', present: true};
     participants.push(participant);
@@ -28,14 +37,20 @@ document.getElementById('add-participant').addEventListener('click', () => {
     }
 });
 
-// Add Item
+/**
+ * Add Item
+ * Adds a new item to the items array and renders the items.
+ */
 document.getElementById('add-item').addEventListener('click', () => {
     const item = {id: items.length, name: '', price: 0, assignedTo: []};
     items.push(item);
     renderItems();
 });
 
-// Attach Calculate Button Event
+/**
+ * Attach Calculate Button Event
+ * Validates inputs, serializes data, and calculates the split when the calculate button is clicked.
+ */
 calculateButton.addEventListener('click', () => {
     if (validateInputs()) {
         const jsonData = serializeData(); // Call serializeData to generate JSON
@@ -44,7 +59,10 @@ calculateButton.addEventListener('click', () => {
     }
 });
 
-// Theme Toggle Logic
+/**
+ * Theme Toggle Logic
+ * Toggles between light and dark themes and updates the button text accordingly.
+ */
 // Check the current theme (light or dark) on page load
 if (localStorage.getItem('theme') === 'dark') {
     document.body.classList.add('dark-mode');
@@ -64,7 +82,10 @@ themeToggleButton.addEventListener('click', () => {
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 });
 
-// Render Participants
+/**
+ * Render Participants
+ * Renders the list of participants in the participants container.
+ */
 function renderParticipants() {
     participantsContainer.innerHTML = ''; // Clear container
     participants.forEach(participant => {
@@ -98,7 +119,10 @@ function renderParticipants() {
     renderItems();
 }
 
-// Render Items
+/**
+ * Render Items
+ * Renders the list of items in the items container.
+ */
 function renderItems() {
     itemsContainer.innerHTML = ''; // Clear container
     items.forEach(item => {
@@ -157,7 +181,10 @@ function renderItems() {
     });
 }
 
-// Render Custom Percentages
+/**
+ * Render Custom Percentages
+ * Renders the custom percentages input fields for each participant.
+ */
 function renderCustomPercentages() {
     customPercentagesDiv.classList.remove('hidden'); // Show the section
     customPercentagesContainer.innerHTML = ''; // Clear existing inputs
@@ -187,7 +214,11 @@ function renderCustomPercentages() {
     });
 }
 
-// Remove Participant
+/**
+ * Remove Participant
+ * Removes a participant by their ID and re-renders the participants and custom percentages.
+ * @param {number} id - The ID of the participant to remove.
+ */
 function removeParticipant(id) {
     participants.splice(id, 1);
     participants.forEach((p, index) => (p.id = index)); // Reassign IDs
@@ -197,14 +228,21 @@ function removeParticipant(id) {
     }
 }
 
-// Remove Item
+/**
+ * Remove Item
+ * Removes an item by their ID and re-renders the items.
+ * @param {number} id - The ID of the item to remove.
+ */
 function removeItem(id) {
     items.splice(id, 1);
     items.forEach((item, index) => (item.id = index)); // Reassign IDs
     renderItems();
 }
 
-// Toggle Custom Percentages Visibility
+/**
+ * Toggle Custom Percentages Visibility
+ * Toggles the visibility of the custom percentages section based on the selected split method.
+ */
 splitMethodSelect.addEventListener('change', () => {
     switch (splitMethodSelect.value) {
         case 'custom':
@@ -216,7 +254,11 @@ splitMethodSelect.addEventListener('change', () => {
     }
 });
 
-// Input Validation
+/**
+ * Input Validation
+ * Validates the inputs for participants and items.
+ * @returns {boolean} - Returns true if all inputs are valid, otherwise false.
+ */
 function validateInputs() {
     let isValid = true;
     let errorMessages = [];
@@ -249,7 +291,10 @@ function validateInputs() {
     return isValid;
 }
 
-// Calculate Split
+/**
+ * Calculate Split
+ * Calculates the split of the total amount based on the selected split method.
+ */
 function calculateSplit() {
     if (!validateInputs()) {
         return; // Stop if inputs are invalid
@@ -322,7 +367,12 @@ function calculateSplit() {
     renderSummary(summary, currency); // Pass currency explicitly
 }
 
-// Distribute Extras Proportionally
+/**
+ * Distribute Extras Proportionally
+ * Distributes the total extras (tax and tip) proportionally based on the selected split method.
+ * @param {number} totalExtras - The total amount of extras (tax and tip) to distribute.
+ * @param {string} method - The selected split method.
+ */
 function distributeExtras(totalExtras, method) {
     switch (method) {
         case 'itemized':
@@ -368,7 +418,12 @@ function distributeExtras(totalExtras, method) {
     }
 }
 
-// Render Summary
+/**
+ * Render Summary
+ * Renders the summary of the split amounts in the summary container.
+ * @param {Object} summary - The summary object containing the split amounts for each participant.
+ * @param {string} currency - The selected currency.
+ */
 function renderSummary(summary, currency) {
     const currencySymbol = {
         'usd': '$',
@@ -382,7 +437,11 @@ function renderSummary(summary, currency) {
         .join('');
 }
 
-// Serialize Data for Backend Integration
+/**
+ * Serialize Data for Backend Integration
+ * Serializes the current state of participants, items, split method, and custom percentages into a JSON string.
+ * @returns {string} - The serialized JSON string.
+ */
 function serializeData() {
     return JSON.stringify({
         participants: participants.map(p => ({
@@ -400,7 +459,10 @@ function serializeData() {
     });
 }
 
-// Export Functions
+/**
+ * Export Functions
+ * Exports the summary as a PDF or CSV file.
+ */
 document.getElementById('export-pdf').addEventListener('click', () => {
     const {jsPDF} = window.jspdf;
     const doc = new jsPDF();

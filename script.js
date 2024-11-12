@@ -87,15 +87,26 @@ themeToggleButton.addEventListener('click', () => {
  * Renders the list of participants in the participants container.
  */
 function renderParticipants() {
-    participantsContainer.innerHTML = ''; // Clear container
+    participantsContainer.innerHTML = ''; // Clear the container
+
     participants.forEach(participant => {
         const participantClone = document.importNode(participantTemplate, true);
+
         const nameInput = participantClone.querySelector('.participant-name');
         const presentToggle = participantClone.querySelector('.participant-present');
         const removeButton = participantClone.querySelector('.remove-button');
+        const toggleLabel = participantClone.querySelector('label[for="participant-present-1"]');
 
-        // Set initial values and event listeners
+        // Ensure unique IDs for the toggle input and its label
+        const uniqueToggleId = `participant-present-${participant.id}`;
+        presentToggle.id = uniqueToggleId;
+        if (toggleLabel) toggleLabel.setAttribute('for', uniqueToggleId);
+
+        // Set initial values
         nameInput.value = participant.name;
+        presentToggle.checked = participant.present;
+
+        // Attach event listeners
         nameInput.addEventListener('input', e => {
             participant.name = e.target.value;
             if (splitMethodSelect.value === 'custom') {
@@ -103,7 +114,6 @@ function renderParticipants() {
             }
         });
 
-        presentToggle.checked = participant.present;
         presentToggle.addEventListener('change', e => {
             participant.present = e.target.checked;
         });
@@ -293,62 +303,36 @@ function validateInputs() {
 
 /**
  * Calculate Split
- * Calculates the split of the total amount based on the selected split method.
+ * Orchestrates the calculation of the split based on the selected method.
  */
 function calculateSplit() {
-    if (!validateInputs()) {
-        return; // Stop if inputs are invalid
-    }
+    if (!validateInputs()) return;
 
-    summary = {}; // Reset summary
-    participants.forEach(p => (summary[p.id] = 0)); // Initialize summary with IDs as keys
+    // Initialize a local summary object
+    let summary = participants.reduce((acc, p) => {
+        acc[p.id] = 0;
+        return acc;
+    }, {});
 
     const method = splitMethodSelect.value;
-    const total = items.reduce((sum, item) => sum + item.price, 0);
+    let presentTotal = 0;
 
-    // Get tax, tip, and currency values
-    const taxPercentage = parseFloat(document.getElementById('tax').value) || 0;
-    const tipPercentage = parseFloat(document.getElementById('tip').value) || 0;
-    const currency = document.getElementById('currency').value; // Get currency value
-
-    // Calculate tax and tip
-    const tax = total * (taxPercentage / 100);
-    const tip = total * (tipPercentage / 100);
-    const totalExtras = tax + tip; // Combined tax and tip
-
-    // Split Calculations Based on Selected Method
     switch (method) {
         case 'itemized':
-            items.forEach(item => {
-                item.assignedTo.forEach(id => {
-                    summary[id] += item.price / item.assignedTo.length;
-                });
-            });
+            summary = calculateItemizedSplit(summary);
             break;
 
         case 'dutch':
-            const perPerson = total / participants.length; // Base split (items only)
-            participants.forEach(p => (summary[p.id] = perPerson));
+            summary = calculateDutchSplit(summary);
             break;
 
         case 'attendance':
-            items.forEach(item => {
-                const presentParticipants = participants.filter(p => p.present && item.assignedTo.includes(p.id));
-                presentParticipants.forEach(p => {
-                    summary[p.id] += item.price / presentParticipants.length;
-                });
-            });
+            presentTotal = calculateAttendanceSplit(summary);
             break;
 
         case 'custom':
-            const totalPercentage = Object.values(customPercentages).reduce((sum, perc) => sum + perc, 0);
-            if (totalPercentage !== 100) {
-                alert('Custom percentages must add up to 100%.');
-                return;
-            }
-            participants.forEach(p => {
-                summary[p.id] = (customPercentages[p.id] / 100) * total || 0;
-            });
+            if (!validateCustomPercentages()) return; // Validate custom percentages
+            summary = calculateCustomSplit(summary);
             break;
 
         default:
@@ -356,28 +340,141 @@ function calculateSplit() {
             return;
     }
 
-    // Distribute Tax and Tip Proportionally
-    distributeExtras(totalExtras, method);
+    console.log("Final Summary Before Tax & Tip Distribution:", summary);
 
-    // Final Rounding
-    Object.keys(summary).forEach(id => {
-        summary[id] = Math.round(summary[id] * 100) / 100; // Round to 2 decimal places
+    // Calculate extras (tax and tip) and distribute
+    const total = presentTotal || calculateTotal();
+    const {tax, tip, totalExtras} = calculateExtras(total);
+    distributeExtras(totalExtras, summary, method);
+
+    console.log("Final Summary After Tax & Tip Distribution:", summary);
+
+    // Final rounding and render
+    finalizeSummary(summary);
+    renderSummary(summary, getCurrency());
+}
+
+/**
+ * Calculate Extras
+ * Computes tax, tip, and combined extras.
+ */
+function calculateExtras(total) {
+    if (isNaN(total) || total <= 0) {
+        console.error("Invalid total for extras calculation:", total);
+        return {tax: 0, tip: 0, totalExtras: 0};
+    }
+
+    const taxPercentage = parseFloat(document.getElementById('tax').value) || 0;
+    const tipPercentage = parseFloat(document.getElementById('tip').value) || 0;
+
+    const tax = total * (taxPercentage / 100);
+    const tip = total * (tipPercentage / 100);
+
+    console.log("Tax Percentage:", taxPercentage, "Tip Percentage:", tipPercentage);
+    console.log("Tax:", tax, "Tip:", tip);
+
+    return {tax, tip, totalExtras: tax + tip};
+}
+
+/**
+ * Calculate Itemized Split
+ * Handles splitting items based on assigned participants.
+ */
+function calculateItemizedSplit(summary) {
+    items.forEach(item => {
+        item.assignedTo.forEach(id => {
+            summary[id] += item.price / item.assignedTo.length;
+        });
+    });
+    return summary;
+}
+
+/**
+ * Calculate Dutch Split
+ * Evenly splits the total across all participants.
+ */
+function calculateDutchSplit(summary) {
+    const total = calculateTotal();
+    const perPerson = total / participants.length;
+
+    participants.forEach(p => {
+        summary[p.id] = perPerson;
     });
 
-    renderSummary(summary, currency); // Pass currency explicitly
+    return summary;
+}
+
+/**
+ * Calculate Attendance Split
+ * Splits costs among present participants.
+ */
+function calculateAttendanceSplit(summary) {
+    let presentTotal = 0;
+
+    items.forEach(item => {
+        const assignedPresentParticipants = participants.filter(p => p.present && item.assignedTo.includes(p.id));
+
+        if (assignedPresentParticipants.length > 0) {
+            const splitAmount = item.price / assignedPresentParticipants.length;
+
+            assignedPresentParticipants.forEach(p => {
+                summary[p.id] += splitAmount;
+            });
+
+            presentTotal += item.price;
+        }
+    });
+
+    console.log("Present Total (Base Costs):", presentTotal);
+    return presentTotal;
+}
+
+/**
+ * Calculate Custom Split
+ * Distributes costs based on custom percentages.
+ */
+function calculateCustomSplit(summary) {
+    const total = calculateTotal();
+
+    participants.forEach(p => {
+        summary[p.id] = (customPercentages[p.id] / 100) * total || 0;
+    });
+
+    return summary;
+}
+
+/**
+ * Validate Custom Percentages
+ * Ensures custom percentages add up to 100.
+ */
+function validateCustomPercentages() {
+    const totalPercentage = Object.values(customPercentages).reduce((sum, perc) => sum + perc, 0);
+    if (totalPercentage !== 100) {
+        alert('Custom percentages must add up to 100%.');
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Finalize Summary
+ * Rounds all values to two decimal places.
+ */
+function finalizeSummary(summary) {
+    Object.keys(summary).forEach(id => {
+        summary[id] = Math.round(summary[id] * 100) / 100;
+    });
 }
 
 /**
  * Distribute Extras Proportionally
- * Distributes the total extras (tax and tip) proportionally based on the selected split method.
- * @param {number} totalExtras - The total amount of extras (tax and tip) to distribute.
- * @param {string} method - The selected split method.
+ * Distributes the total extras (tax and tip) proportionally.
  */
-function distributeExtras(totalExtras, method) {
+function distributeExtras(totalExtras, summary, method) {
     switch (method) {
         case 'itemized':
-            // Distribute extras proportionally based on each participant's share
             const totalShares = Object.values(summary).reduce((sum, value) => sum + value, 0);
+
             participants.forEach(p => {
                 if (summary[p.id] > 0) {
                     const sharePercentage = summary[p.id] / totalShares;
@@ -387,53 +484,67 @@ function distributeExtras(totalExtras, method) {
             break;
 
         case 'dutch':
-            // Split extras evenly
             const extrasPerPerson = totalExtras / participants.length;
+
             participants.forEach(p => {
                 summary[p.id] += extrasPerPerson;
             });
             break;
 
         case 'attendance':
-            // Distribute extras among present participants
             const presentParticipants = participants.filter(p => p.present);
             const extrasPerPresent = totalExtras / presentParticipants.length;
+
             presentParticipants.forEach(p => {
                 summary[p.id] += extrasPerPresent;
             });
             break;
 
         case 'custom':
-            // Distribute extras based on custom percentages
             participants.forEach(p => {
-                if (customPercentages[p.id]) {
-                    const percentage = customPercentages[p.id] / 100;
-                    summary[p.id] += totalExtras * percentage;
-                }
+                const percentage = customPercentages[p.id] / 100;
+                summary[p.id] += totalExtras * percentage;
             });
             break;
 
         default:
-            console.error('Unknown method for distributing extras.');
+            console.error("Unknown method for distributing extras.");
     }
+}
+
+/**
+ * Calculate Total
+ * Sums up the item prices.
+ */
+function calculateTotal() {
+    return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+/**
+ * Get Currency
+ * Retrieves the currently selected currency.
+ */
+function getCurrency() {
+    return document.getElementById('currency').value;
 }
 
 /**
  * Render Summary
  * Renders the summary of the split amounts in the summary container.
- * @param {Object} summary - The summary object containing the split amounts for each participant.
- * @param {string} currency - The selected currency.
  */
 function renderSummary(summary, currency) {
     const currencySymbol = {
         'usd': '$',
         'gbp': '£',
         'eur': '€',
-        'jpy': '¥' // Added JPY
-    }[currency] || '$';
+        'jpy': '¥'
+    }[currency] || '£';
 
     summaryContainer.innerHTML = participants
-        .map(p => `<li>${p.name}: ${currencySymbol}${(summary[p.id] || 0).toFixed(2)}</li>`)
+        .map(p => {
+            const amount = summary[p.id] || 0;
+            return `<li>${p.name}: ${currencySymbol}${amount.toFixed(2)}</li>`;
+        })
         .join('');
 }
 
@@ -471,11 +582,13 @@ document.getElementById('export-pdf').addEventListener('click', () => {
     doc.text("Payment Summary", 10, 10);
 
     // Add participants and their amounts
-    let yOffset = 20; // Start below the title
+    const initialYOffset = 20; // Starting position for text
+    const lineSpacing = 10; // Spacing between lines
+    let yOffset = initialYOffset; // Start below the title
     participants.forEach((p) => {
         const amount = (summary[p.id] || 0).toFixed(2);
         doc.text(`${p.name}: ${amount}`, 10, yOffset);
-        yOffset += 10; // Move down for the next line
+        yOffset += lineSpacing; // Move down for the next line
     });
 
     // Save the PDF

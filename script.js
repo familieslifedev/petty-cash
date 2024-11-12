@@ -54,7 +54,7 @@ document.getElementById('add-item').addEventListener('click', () => {
 calculateButton.addEventListener('click', () => {
     if (validateInputs()) {
         const jsonData = serializeData(); // Call serializeData to generate JSON
-        console.log('Serialized JSON:', jsonData); // Log the JSON to the console
+        console.info('Serialized JSON:', jsonData); // Log the JSON to the console
         calculateSplit(); // Proceed with calculations
     }
 });
@@ -331,7 +331,7 @@ function calculateSplit() {
             break;
 
         case 'custom':
-            if (!validateCustomPercentages()) return; // Validate custom percentages
+            if (!validateCustomPercentages()) return;
             summary = calculateCustomSplit(summary);
             break;
 
@@ -339,17 +339,9 @@ function calculateSplit() {
             alert('Invalid split method selected.');
             return;
     }
-
-    console.log("Final Summary Before Tax & Tip Distribution:", summary);
-
-    // Calculate extras (tax and tip) and distribute
     const total = presentTotal || calculateTotal();
     const {tax, tip, totalExtras} = calculateExtras(total);
     distributeExtras(totalExtras, summary, method);
-
-    console.log("Final Summary After Tax & Tip Distribution:", summary);
-
-    // Final rounding and render
     finalizeSummary(summary);
     renderSummary(summary, getCurrency());
 }
@@ -369,9 +361,6 @@ function calculateExtras(total) {
 
     const tax = total * (taxPercentage / 100);
     const tip = total * (tipPercentage / 100);
-
-    console.log("Tax Percentage:", taxPercentage, "Tip Percentage:", tipPercentage);
-    console.log("Tax:", tax, "Tip:", tip);
 
     return {tax, tip, totalExtras: tax + tip};
 }
@@ -424,8 +413,6 @@ function calculateAttendanceSplit(summary) {
             presentTotal += item.price;
         }
     });
-
-    console.log("Present Total (Base Costs):", presentTotal);
     return presentTotal;
 }
 
@@ -474,36 +461,42 @@ function distributeExtras(totalExtras, summary, method) {
     switch (method) {
         case 'itemized':
             const totalShares = Object.values(summary).reduce((sum, value) => sum + value, 0);
-
             participants.forEach(p => {
                 if (summary[p.id] > 0) {
                     const sharePercentage = summary[p.id] / totalShares;
-                    summary[p.id] += totalExtras * sharePercentage;
+                    const extrasShare = Math.round(totalExtras * sharePercentage * 100) / 100;
+                    summary[p.id] += extrasShare;
                 }
             });
             break;
 
         case 'dutch':
-            const extrasPerPerson = totalExtras / participants.length;
-
+            const extrasPerPerson = Math.round((totalExtras / participants.length) * 100) / 100;
             participants.forEach(p => {
                 summary[p.id] += extrasPerPerson;
+                summary[p.id] = Math.round(summary[p.id] * 100) / 100;
             });
             break;
 
         case 'attendance':
             const presentParticipants = participants.filter(p => p.present);
-            const extrasPerPresent = totalExtras / presentParticipants.length;
+            const totalBaseCosts = presentParticipants.reduce((sum, p) => sum + summary[p.id], 0);
 
             presentParticipants.forEach(p => {
-                summary[p.id] += extrasPerPresent;
+                const participantBaseCost = summary[p.id];
+                const proportionalExtras = totalExtras * (participantBaseCost / totalBaseCosts);
+                summary[p.id] += proportionalExtras;
             });
             break;
 
         case 'custom':
             participants.forEach(p => {
-                const percentage = customPercentages[p.id] / 100;
-                summary[p.id] += totalExtras * percentage;
+                if (customPercentages[p.id]) {
+                    const percentage = customPercentages[p.id] / 100;
+                    const extrasShare = Math.round(totalExtras * percentage * 100) / 100;
+                    summary[p.id] += extrasShare;
+                    summary[p.id] = Math.round(summary[p.id] * 100) / 100; // Final rounding for each participant
+                }
             });
             break;
 

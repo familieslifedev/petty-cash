@@ -1,4 +1,5 @@
 /* General Reset */
+/* Reset margin, padding, and box-sizing for all elements */
 * {
     margin: 0;
     padding: 0;
@@ -6,6 +7,7 @@
 }
 
 /* Body and Layout */
+/* Set default font, background color, text color, line height, and padding for the body */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f8f9fa;
@@ -14,22 +16,25 @@ body {
     padding: 20px;
 }
 
+/* Center align header text and add bottom margin */
 header {
     text-align: center;
     margin-bottom: 20px;
 }
 
+/* Style for header h1 element */
 header h1 {
     font-size: 2rem;
     color: #495057;
 }
 
+/* Style for header paragraph */
 header p {
     font-size: 1rem;
     color: #6c757d;
 }
 
-/* Main Content */
+/* Main content area styling */
 main {
     max-width: 800px;
     margin: auto;
@@ -39,16 +44,39 @@ main {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+/* Dark mode styles for body */
+body.dark-mode {
+    background-color: #121212;
+    color: #000000;
+}
+
+/* Dark mode styles for header h1 and h2 */
+body.dark-mode header h1,
+body.dark-mode header h2 {
+    color: #f8f9fa;
+}
+
+/* Dark mode styles for main content area */
+main.dark-mode {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+/* Section Styling */
+/* Add bottom margin to sections */
 section {
     margin-bottom: 20px;
 }
 
-section h2 {
+/* Style for all heading elements within sections */
+section h1 h2 h3 h4 h5 h6 {
     font-size: 1.25rem;
     margin-bottom: 10px;
-    color: #495057;
+    color: #ffffff;
 }
 
+/* Buttons */
+/* General button styling */
 button {
     display: inline-block;
     background: #007bff;
@@ -58,13 +86,49 @@ button {
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
+    transition: background-color 0.3s ease;
 }
 
+/* Button hover state */
 button:hover {
     background: #0056b3;
 }
 
+/* Button active state */
+button:active {
+    transform: scale(0.98);
+}
+
+/* Dark mode styles for buttons */
+button.dark-mode {
+    background: #444;
+    color: #ddd;
+}
+
+/* Dark mode button hover state */
+button.dark-mode:hover {
+    background: #333;
+}
+
+/* Remove Button */
+/* Styling for remove button */
+.remove-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+/* Remove button hover state */
+.remove-button:hover {
+    background: #c82333;
+}
+
 /* Inputs and Forms */
+/* General input and select styling */
 input, select {
     width: 100%;
     padding: 8px;
@@ -74,18 +138,28 @@ input, select {
     font-size: 0.9rem;
 }
 
+/* Select element cursor style */
 select {
     cursor: pointer;
 }
 
+/* Focus state for input and select elements */
+input:focus, select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.25);
+}
+
 /* Toggle Switch */
+/* Toggle switch container */
 .toggle {
     position: relative;
     display: inline-block;
-    width: 60px; /* Increased width */
-    height: 25px; /* Original height */
+    width: 60px;
+    height: 25px;
 }
 
+/* Toggle switch slider */
 .toggle-slider {
     position: absolute;
     top: 0;
@@ -97,11 +171,12 @@ select {
     transition: 0.4s;
 }
 
+/* Toggle switch slider before state */
 .toggle-slider:before {
     content: '';
     position: absolute;
-    height: 21px; /* Original height */
-    width: 21px; /* Original width */
+    height: 21px;
+    width: 21px;
     left: 2px;
     bottom: 2px;
     background-color: white;
@@ -109,33 +184,39 @@ select {
     transition: 0.4s;
 }
 
+/* Checked state for toggle switch */
 input:checked + .toggle-slider {
-    background-color: #28a745; /* Green for "Present" status */
+    background-color: #28a745;
 }
 
+/* Checked state for toggle switch slider */
 input:checked + .toggle-slider:before {
-    transform: translateX(14px); /* Adjusted transform distance */
+    transform: translateX(14px);
 }
 
 /* Hidden Elements */
+/* Hide elements with the hidden class */
 .hidden {
     display: none;
 }
 
-/* Checkbox Styling - Green */
+/* Checkbox Styling */
+/* Checkbox input styling */
 .checkbox-row input[type="checkbox"] {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: #28a745; /* Green Checkbox */
+    accent-color: #28a745;
 }
 
+/* Checkbox label styling */
 .checkbox-row label {
     font-size: 0.9rem;
     color: #333;
 }
 
 /* Participant Row */
+/* Flexbox styling for participant row */
 .participant-row {
     display: flex;
     align-items: center;
@@ -144,6 +225,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* Item Row */
+/* Flexbox styling for item row */
 .item-row {
     display: flex;
     flex-direction: column;
@@ -152,6 +234,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* Assign Container */
+/* Flexbox styling for assign container */
 .assign-container {
     display: flex;
     flex-wrap: wrap;
@@ -159,17 +242,104 @@ input:checked + .toggle-slider:before {
     margin-top: 5px;
 }
 
-/* Remove Button */
-.remove-button {
-    background: #dc3545; /* Red for delete */
+/* Tax and Tip Section */
+/* Styling for tax and tip section */
+#tax-tip-section {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Label styling for tax and tip section */
+#tax-tip-section label {
+    font-size: 1rem;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+/* Input and select styling for tax and tip section */
+#tax-tip-section input, #tax-tip-section select {
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+/* Dark mode styles for body */
+body.dark-mode {
+    background-color: #333;
+    border: 1px solid #555;
+}
+
+/* Export Section */
+/* Styling for export section */
+#export-section {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Button styling for export section */
+#export-section button {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover state for export section button */
+#export-section button:hover {
+    background: #218838;
+}
+
+/* Active state for export section button */
+#export-section button:active {
+    background: #1e7e34;
+    transform: scale(0.98);
+}
+
+/* Theme Toggle Button */
+/* Styling for theme toggle button */
+.theme-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.remove-button:hover {
-    background: #c82333; /* Darker red for hover */
+/* Hover state for theme toggle button */
+.theme-button:hover {
+    background: #0056b3;
+}
+
+/* Dark mode styles for theme button */
+body.dark-mode .theme-button {
+    background: #444;
+    color: #ddd;
+}
+
+/* Dark mode hover state for theme button */
+body.dark-mode .theme-button:hover {
+    background: #555;
+}
+
+/* Checkbox Row */
+/* Flexbox styling for checkbox row */
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
 }
